@@ -445,7 +445,12 @@ export class Take implements Operator {
       return;
     }
 
-    assert(takeState.bound, 'Bound should be set');
+    if (takeState.bound === undefined) {
+      // The take window is empty (size 0), so there is no bound and nothing
+      // this edit could be replacing within the window. Mirror the remove
+      // path above and treat the edit as a no-op instead of asserting.
+      return;
+    }
     const {compareRows} = this.getSchema();
     const oldCmp = compareRows(
       change[ChangeIndex.OLD_NODE].row,
